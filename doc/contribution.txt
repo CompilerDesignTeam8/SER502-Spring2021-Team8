@@ -1,0 +1,16 @@
+ 
+We are planning to divide the work as follows :
+
+Lexer : Arjun, Shubhangi
+Parser : Nitish
+Interpreter : Paresh, Shubhangi
+Integration – Nitish, Arjun
+Miscellaneous tasks : Arjun, Shubhangi, Paresh, Nitish
+
+
+Contribution till now :
+
+Grammar : Nitish, Paresh
+Design  : Shubhangi , Arjun
+Documentation : Shubhangi, Arjun
+Analysis and exploration : Arjun, Shubhangi, Paresh, Nitish
