@@ -1,5 +1,5 @@
 :- table expr_minus/3, term/3, multiply/3, division/3. 
-%:- use_rendering(svgtree).
+:- use_rendering(svgtree).
 % program will parse the block ending with a [.].
 % test the following predicate by running the following command 
 
@@ -45,12 +45,15 @@ commands(print(N)) --> [print], print_statements(N).
 commands(block(Block)) --> block(Block).
 
 print_statements(print_string_and_more(N, Print)) --> [<<], [N], print_statements(Print), {string(N)}.
+
 print_statements(print_number_and_more(N, Print)) --> [<<], [N], print_statements(Print), {number(N)}.
+
 print_statements(print_id_and_more(N, Print)) --> [<<], variable(N), print_statements(Print).
+print_statements(endline_and_more(N, Print)) --> [<<], [end_l], print_statements(Print), {N = endl}.
 print_statements(print_string(N)) --> [<<], [N], [;], {string(N)}.
 print_statements(print_number(N)) --> [<<], [N], [;], {number(N)}.
 print_statements(print_id(N)) --> [<<], variable(N), [;].
-
+print_statements(endline(N)) --> [<<], [end_l], {N = endl}.
 % boolean is a condition which checks whether a given statement is of type boolean
 % to satisfy this, it should either be true, false, expression = expression, or not boolean.
 
@@ -162,8 +165,8 @@ declarations(declarations(datatype(Datatype), identifier(Identifier)))
 */
 
 
-eval_declarations(declarations(datatype(_Datatype), identifier(variable(Identifier)), number(Value)), Environment, New_Environment) :- update(Identifier, Value, Environment, New_Environment).
-eval_declarations(declarations(datatype(_Datatype), identifier(variable(Identifier)), value(string(Value))), Environment, New_Environment) :- update(Identifier, Value, Environment, New_Environment).
+eval_declarations(declarations(datatype(_Datatype), identifier(variable(Identifier)), number(Value)), Environment, New_Environment) :- (declaration_initial_lookup(Identifier, Environment, _Result) -> write("Variable "), write(Identifier), write(" previously declared"), fail ; update(Identifier, Value, Environment, New_Environment)).
+eval_declarations(declarations(datatype(_Datatype), identifier(variable(Identifier)), value(string(Value))), Environment, New_Environment) :- (declaration_initial_lookup(Identifier, Environment, _Result) -> write("Variable "), write(Identifier), write(" previously declared"), fail  ; update(Identifier, Value, Environment, New_Environment)).
 eval_declarations(declarations(datatype(_Datatype), identifier(variable(Identifier))), Environment, New_Environment) :- (declaration_initial_lookup(Identifier, Environment, Result) -> update(Identifier, Result, Environment, New_Environment) ; update(Identifier, _, Environment, New_Environment)).
 
 % eval_commands/3 will take input commands and will evaluate them conforming to the current environment
@@ -269,7 +272,7 @@ eval_expr(variable(Variable), Environment, Number, Environment) :- lookup(Variab
 
 declaration_initial_lookup(Identifier, [(Identifier, Value)|_], Value).
 declaration_initial_lookup(Identifier, [(Head, _)|RestofEnvironment], Value) :- Identifier \= Head, declaration_initial_lookup(Identifier, RestofEnvironment, Value).
-declaration_initial_lookup(_, [], _).
+declaration_initial_lookup(_, [], _) :- fail.
 
 % lookup searches for the value of an identifier within an environment,
 % Once found, it will return the value, else will throw an error.
