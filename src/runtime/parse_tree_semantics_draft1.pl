@@ -41,11 +41,15 @@ commands(legacy_for_loop(declarations(Declaration), boolean(Boolean), expression
 commands(if_else(boolean(Boolean), commands1(Commands1), commands2(Commands2))) --> [if], ['('], boolean(Boolean), [')'], commands(Commands1),  [else],  commands(Commands2).
 commands(if(boolean(Boolean), commands(Commands))) --> [if], ['('], boolean(Boolean), [')'], commands(Commands).
 commands(while(boolean(Boolean), commands(Commands))) --> [while], ['('], boolean(Boolean), [')'], commands(Commands).
-commands(print_string(N)) --> [print], [<<], [N], [;], {string(N)}.
-commands(print_number(N)) --> [print], [<<], [N], [;], {number(N)}.
-commands(print_id(N)) --> [print], [<<], variable(N), [;].
+commands(print(N)) --> [print], print_statements(N).
 commands(block(Block)) --> block(Block).
 
+print_statements(print_string_and_more(N, Print)) --> [<<], [N], print_statements(Print), {string(N)}.
+print_statements(print_number_and_more(N, Print)) --> [<<], [N], print_statements(Print), {number(N)}.
+print_statements(print_id_and_more(N, Print)) --> [<<], variable(N), print_statements(Print).
+print_statements(print_string(N)) --> [<<], [N], [;], {string(N)}.
+print_statements(print_number(N)) --> [<<], [N], [;], {number(N)}.
+print_statements(print_id(N)) --> [<<], variable(N), [;].
 
 % boolean is a condition which checks whether a given statement is of type boolean
 % to satisfy this, it should either be true, false, expression = expression, or not boolean.
@@ -174,10 +178,15 @@ commands(legacy_for_loop(declarations(Declaration), boolean(Boolean), expression
 commands(if_else(boolean(Boolean), commands1(Commands1), commands2(Commands2))) --> [if], ['('], boolean(Boolean), [')'], commands(Commands1),  [else],  commands(Commands2).
 commands(if(boolean(Boolean), commands(Commands))) --> [if], ['('], boolean(Boolean), [')'], commands(Commands).
 commands(while(boolean(Boolean), commands(Commands))) --> [while], ['('], boolean(Boolean), [')'], commands(Commands).
-commands(print_string(N)) --> [print], [<<], [N], [;], {string(N)}.
-commands(print_number(N)) --> [print], [<<], [N], [;], {number(N)}.
-commands(print_id(N)) --> [print], [<<], variable(N), [;].
+commands(print(N)) --> [print], print_statements(N).
 commands(block(Block)) --> block(Block).
+
+print_statements(print_string_and_more(N, Print)) --> [<<], [N], print_statements(Print), {string(N)}.
+print_statements(print_number_and_more(N, Print)) --> [<<], [N], print_statements(Print), {number(N)}.
+print_statements(print_id_and_more(N, Print)) --> [<<], variable(N), print_statements(Print).
+print_statements(print_string(N)) --> [<<], [N], [;], {string(N)}.
+print_statements(print_number(N)) --> [<<], [N], [;], {number(N)}.
+print_statements(print_id(N)) --> [<<], variable(N), [;].
 
 */
 
@@ -190,9 +199,15 @@ eval_commands(if_else(boolean(Boolean), commands1(_Commands1), commands2(Command
 eval_commands(if(boolean(Boolean), commands(Commands)), Environment, NewEnvironment) :- eval_bool(Boolean, Environment, MediatorEnvironment, true), eval_commands(Commands, MediatorEnvironment,NewEnvironment).
 eval_commands(if(boolean(Boolean), commands(_Commands)), Environment, NewEnvironment) :- eval_bool(Boolean, Environment, NewEnvironment, false).
 eval_commands(=(variable(Variable), Expressions), Environment, New_Environment) :- eval_expr(Expressions, Environment, Result, MediatorEnvironment), update(Variable, Result, MediatorEnvironment, New_Environment).
-eval_commands(print_string(N), Environment, Environment) :- write(N).
-eval_commands(print_number(N), Environment, Environment) :- write(N).
-eval_commands(print_id(variable(N)), Environment, Environment) :- lookup(N, Environment, Result), write(Result).
+eval_commands(print(N), Environment, Environment) :- eval_print_statements(N, Environment, Environment).
+
+
+eval_print_statements(print_string_and_more(N, Print), Environment, Environment) :- write(N), eval_print_statements(Print, Environment, Environment).
+eval_print_statements(print_number_and_more(N, Print), Environment, Environment) :- write(N), eval_print_statements(Print, Environment, Environment).
+eval_print_statements(print_id_and_more(variable(N), Print), Environment, Environment) :-  lookup(N, Environment, Result), write(Result), eval_print_statements(Print, Environment, Environment).
+eval_print_statements(print_string(N), Environment, Environment) :- write(N).
+eval_print_statements(print_number(N), Environment, Environment) :- write(N).
+eval_print_statements(print_id(variable(N)), Environment, Environment) :- lookup(N, Environment, Result), write(Result).
 
 % eval_bool/4 will take into account an Environment and will evaluate an expression, which might have a
 % side affect on the environment, and hence will return a new environment as well. It will return true or false depending on
