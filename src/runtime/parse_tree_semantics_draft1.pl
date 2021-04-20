@@ -1,5 +1,5 @@
 :- table expr_minus/3, term/3, multiply/3, division/3. 
-:- use_rendering(svgtree).
+%:- use_rendering(svgtree).
 % program will parse the block ending with a [.].
 % test the following predicate by running the following command 
 
@@ -28,6 +28,7 @@ statements(statements(Commands)) --> commands(Commands).
 declarations(declarations(datatype(Datatype), identifier(Identifier), number(Number))) --> datatype(Datatype), variable(Identifier), [=], number(Number), [;].
 declarations(declarations(datatype(Datatype), identifier(Identifier), value(Value))) --> datatype(Datatype), variable(Identifier), [=], value(Value), [;].
 declarations(declarations(datatype(Datatype), identifier(Identifier))) --> datatype(Datatype), variable(Identifier), [;].
+declarations(expr_assgn(datatype(Datatype), identifier(Identifier), expression(Expressions))) --> datatype(Datatype), variable(Identifier), [=], expr(Expressions).
 
 % commands will be assignment, an if condition or a while condition.
 % a command can have a block within it, and will incorporate that to parse a statement
@@ -37,23 +38,23 @@ declarations(declarations(datatype(Datatype), identifier(Identifier))) --> datat
 % commands([z, :=, 0, ;, if, x, =, y, +, 2, then, begin, var, u, ;, z , := , 5,;, u, :=, 3, end, else, z, :=, 3, endif, ;, while, not, x, =, z, do, z, :=, z, /, 2, endwhile], []).
 
 commands(=(Variable, Expressions)) --> variable(Variable), [=], expr(Expressions), [;].
-commands(legacy_for_loop(declarations(Declaration), boolean(Boolean), expressions(Epression), commands(Commands))) --> [for], ['('], expr(Declaration), [;], boolean(Boolean), [;], expr(Epression), [')'], commands(Commands).
+commands(legacy_for_loop(declarations(Declaration), boolean(Boolean), expressions(Expression), commands(Commands))) --> [for], ['('], declarations(Declaration), boolean(Boolean), [;], expr(Expression), [')'], commands(Commands).
 commands(if_else(boolean(Boolean), commands1(Commands1), commands2(Commands2))) --> [if], ['('], boolean(Boolean), [')'], commands(Commands1),  [else],  commands(Commands2).
 commands(if(boolean(Boolean), commands(Commands))) --> [if], ['('], boolean(Boolean), [')'], commands(Commands).
 commands(while(boolean(Boolean), commands(Commands))) --> [while], ['('], boolean(Boolean), [')'], commands(Commands).
 commands(print(N)) --> [print], print_statements(N).
 commands(block(Block)) --> block(Block).
 
-print_statements(print_string_and_more(N, Print)) --> [<<], [N], print_statements(Print), {string(N)}.
+print_statements(print_string_and_more(N, Print)) --> ['<<'], [N], print_statements(Print), {string(N)}.
 
-print_statements(print_number_and_more(N, Print)) --> [<<], [N], print_statements(Print), {number(N)}.
+print_statements(print_number_and_more(N, Print)) --> ['<<'], [N], print_statements(Print), {number(N)}.
 
-print_statements(print_id_and_more(N, Print)) --> [<<], variable(N), print_statements(Print).
-print_statements(endline_and_more(N, Print)) --> [<<], [end_l], print_statements(Print), {N = endl}.
-print_statements(print_string(N)) --> [<<], [N], [;], {string(N)}.
-print_statements(print_number(N)) --> [<<], [N], [;], {number(N)}.
-print_statements(print_id(N)) --> [<<], variable(N), [;].
-print_statements(endline(N)) --> [<<], [end_l], {N = endl}.
+print_statements(print_id_and_more(N, Print)) --> ['<<'], variable(N), print_statements(Print).
+print_statements(endline_and_more(N, Print)) --> ['<<'], [end_l], print_statements(Print), {N = endl}.
+print_statements(print_string(N)) --> ['<<'], [N], [;], {string(N)}.
+print_statements(print_number(N)) --> ['<<'], [N], [;], {number(N)}.
+print_statements(print_id(N)) --> ['<<'], variable(N), [;].
+print_statements(endline(N)) --> ['<<'], [end_l], {N = endl}.
 
 % boolean is a condition which checks whether a given statement is of type boolean
 % to satisfy this, it should either be true, false, expression = expression, or not boolean.
@@ -81,8 +82,10 @@ boolean(not(Boolean)) --> [!], boolean(Boolean).
 % expressions([2, +, 3, *, 5], []).
 % expressions([2, *, 3, *, 5, + , 3, *, 4, *, 5], []).
 
-expr(expr_assgn(Datatype, Variable, Expressions)) --> datatype(Datatype), variable(Variable), [:=], expr(Expressions).
-expr(Brackets) --> expr_minus(Brackets).
+expr(expr_assgn(Variable, Expressions)) --> variable(Variable), [=], expr(Expressions).
+expr(Brackets) --> expr_increment(Brackets).
+expr_increment(increment(Variable)) --> variable(Variable), [++].
+expr_increment(Expression) --> expr_minus(Expression).
 expr_minus(-(T1, T2)) --> expr_minus(T1), [-], term(T2).
 expr_minus(T1) --> term(T1).
 term(+(T1, T2)) --> term(T1), [+], multiply(T2).
@@ -165,11 +168,12 @@ eval_statements(statements(Commands), Environment, NewEnvironment) :- eval_comma
 declarations(declarations(datatype(Datatype), identifier(Identifier), number(Number)))
 declarations(declarations(datatype(Datatype), identifier(Identifier), value(Value)))
 declarations(declarations(datatype(Datatype), identifier(Identifier)))
-
+declarations(expr_assgn(datatype(Datatype), identifier(Identifier), expression(Expressions)))
 */
 
 
 eval_declarations(declarations(datatype(_Datatype), identifier(variable(Identifier)), number(Value)), Environment, New_Environment) :- (declaration_lookup(Identifier, Environment, _Result) -> write("Variable "), write(Identifier), write(" previously declared"), fail ; update(Identifier, Value, Environment, New_Environment)).
+eval_declarations(expr_assgn(datatype(_Datatype), identifier(Identifier), expression(Expressions)), Environment, New_Environment) :- (declaration_lookup(Identifier, Environment, _Result) -> write("Variable "), write(Identifier), write(" previously declared"), fail ; eval_expr(Expressions, Environment, Result, MedEnv), update(Identifier, Result, MedEnv, New_Environment)).
 eval_declarations(declarations(datatype(_Datatype), identifier(variable(Identifier)), value(string(Value))), Environment, New_Environment) :- (declaration_lookup(Identifier, Environment, _Result) -> write("Variable "), write(Identifier), write(" previously declared"), fail  ; update(Identifier, Value, Environment, New_Environment)).
 eval_declarations(declarations(datatype(_Datatype), identifier(variable(Identifier))), Environment, New_Environment) :- (declaration_lookup(Identifier, Environment, Result) -> update(Identifier, Result, Environment, New_Environment) ; update(Identifier, _, Environment, New_Environment)).
 
@@ -197,7 +201,10 @@ print_statements(print_id(N)) --> [<<], variable(N), [;].
 
 */
 
-
+eval_commands(legacy_for_loop(declarations(Declaration), boolean(Boolean), expressions(Expression), commands(Commands)), Environment, New_Environment) :- eval_declarations(Declaration, Environment, MediatorEnv), eval_commands(recursive_for(boolean(Boolean), expression(Expression), commands(Commands)), MediatorEnv, New_Environment).
+eval_commands(legacy_for_loop(declarations(Declaration), boolean(Boolean), expressions(_Epression), commands(_Commands)), Environment, New_Environment) :- eval_declarations(Declaration, Environment, MediatorEnv), eval_bool(Boolean, MediatorEnv, New_Environment, false).
+eval_commands(recursive_for(boolean(Boolean), expression(Expression), commands(Commands)), Environment, New_Environment) :- eval_bool(Boolean, Environment, MediatorEnv, true), eval_expr(Expression, MediatorEnv, _, NewMediatorEnv), eval_commands(Commands, NewMediatorEnv, TransitEnv), eval_commands(recursive_for(boolean(Boolean), expression(Expression), commands(Commands)), TransitEnv, New_Environment).
+eval_commands(recursive_for(boolean(Boolean), expression(_Expression), commands(_Commands)), Environment, New_Environment) :- eval_bool(Boolean, Environment, New_Environment, false).
 eval_commands(block(Block), Environment, New_Environment) :- eval_block(Block, Environment, New_Environment).
 eval_commands(while(boolean(Boolean), commands(Commands)), Environment, New_Environment) :- eval_bool(Boolean, Environment, MediatorEnvironment, true), eval_commands(Commands, MediatorEnvironment, MediatorEnvironment1), eval_commands(while(boolean(Boolean), commands(Commands)), MediatorEnvironment1, New_Environment).
 eval_commands(while(boolean(Boolean), commands(_Commands)), Environment, New_Environment) :- eval_bool(Boolean, Environment, New_Environment, false).
@@ -261,6 +268,24 @@ eval_bool(not(Boolean), Environment, New_Environment, false) :- eval_bool(Boolea
 % expr(T, ['(', x, +, '(',y, +, '(', z, *, z, ')', *, x, ')', *, y, ')'], []), eval_expr(T, [(x,1),(y,4),(z,2)], R).
 % eval_bool(var(x)=var(y), [(x, 2), (y,3)], NV, Boolean).
 
+/*
+expr(expr_assgn(Variable, Expressions)) --> variable(Variable), [=], expr(Expressions).
+expr(Brackets) --> expr_increment(Brackets).
+expr_increment(increment(Variable)) --> variable(Variable), [++].
+expr_increment(Expression) --> expr_minus(Expression).
+expr_minus(-(T1, T2)) --> expr_minus(T1), [-], term(T2).
+expr_minus(T1) --> term(T1).
+term(+(T1, T2)) --> term(T1), [+], multiply(T2).
+term(N) --> multiply(N).
+multiply(*(T1, T2)) --> multiply(T1), [*], division(T2).
+multiply(N) --> division(N).
+division('/'(T1, T2)) --> division(T1), [/], number(T2).
+division(Assign) --> brackets(Assign).
+brackets('(expr)'(N)) --> ['('], expr(N), [')'].
+brackets(N) --> number(N).
+brackets(Variable) --> variable(Variable).
+*/
+
 eval_expr(+(Tree1, Tree2), Environment, Result, New_Environment) :- eval_expr(Tree1, Environment, ResultofTree1, Med_Env), eval_expr(Tree2, Med_Env, ResultofTree2, New_Environment), Result is ResultofTree1 + ResultofTree2.
 eval_expr(-(Tree1, Tree2), Environment, Result, New_Environment) :- eval_expr(Tree1, Environment, ResultofTree1, Med_Env), eval_expr(Tree2, Med_Env, ResultofTree2, New_Environment), Result is ResultofTree1 - ResultofTree2.
 eval_expr(*(Tree1, Tree2), Environment, Result, New_Environment) :- eval_expr(Tree1, Environment, ResultofTree1, Med_Env), eval_expr(Tree2, Med_Env, ResultofTree2, New_Environment), Result is ResultofTree1 * ResultofTree2.
@@ -269,7 +294,7 @@ eval_expr(Number, Environment, Number, Environment) :- number(Number).
 eval_expr('(expr)'(Expressions), Environment, Result, New_Environment) :- eval_expr(Expressions, Environment, Result, New_Environment).
 eval_expr(expr_assgn(variable(Variable), Expressions), Environment, Result, New_Environment) :- eval_expr(Expressions, Environment, Result, MediatorEnvironment), update(Variable, Result, MediatorEnvironment, New_Environment).
 eval_expr(variable(Variable), Environment, Number, Environment) :- lookup(Variable, Environment, Number).
-
+eval_expr(increment(variable(Variable)), Environment, Increment, New_Environment) :- lookup(Variable, Environment, Number), Increment is Number + 1, update(Variable, Increment, Environment, New_Environment).
 % declaration_initial_lookup searches for the value of an identifier within an environment
 % initially to give a value to the command line arguments which may be redeclared within the code
 % Once found, it will return the value, else will throw an error.
