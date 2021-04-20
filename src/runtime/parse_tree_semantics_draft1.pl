@@ -54,6 +54,7 @@ print_statements(print_string(N)) --> [<<], [N], [;], {string(N)}.
 print_statements(print_number(N)) --> [<<], [N], [;], {number(N)}.
 print_statements(print_id(N)) --> [<<], variable(N), [;].
 print_statements(endline(N)) --> [<<], [end_l], {N = endl}.
+
 % boolean is a condition which checks whether a given statement is of type boolean
 % to satisfy this, it should either be true, false, expression = expression, or not boolean.
 
@@ -64,7 +65,10 @@ boolean(true(T)) --> [true], {T = true}.
 boolean(false(F)) --> [false], {F = false}.
 boolean(>(Expressions, Expressions2)) --> expr(Expressions), [>], expr(Expressions2).
 boolean(<(Expressions, Expressions2)) --> expr(Expressions), [<], expr(Expressions2).
+boolean(>=(Expressions, Expressions2)) --> expr(Expressions), [>=], expr(Expressions2).
+boolean(<=(Expressions, Expressions2)) --> expr(Expressions), [<=], expr(Expressions2).
 boolean(==(Expressions, Expressions2)) --> expr(Expressions), [==], expr(Expressions2).
+boolean(!=(Expressions, Expressions2)) --> expr(Expressions), ["!="], expr(Expressions2).
 boolean(not(Boolean)) --> [!], boolean(Boolean).
 
 % expressions are arithmetic expressions 
@@ -165,9 +169,9 @@ declarations(declarations(datatype(Datatype), identifier(Identifier)))
 */
 
 
-eval_declarations(declarations(datatype(_Datatype), identifier(variable(Identifier)), number(Value)), Environment, New_Environment) :- (declaration_initial_lookup(Identifier, Environment, _Result) -> write("Variable "), write(Identifier), write(" previously declared"), fail ; update(Identifier, Value, Environment, New_Environment)).
-eval_declarations(declarations(datatype(_Datatype), identifier(variable(Identifier)), value(string(Value))), Environment, New_Environment) :- (declaration_initial_lookup(Identifier, Environment, _Result) -> write("Variable "), write(Identifier), write(" previously declared"), fail  ; update(Identifier, Value, Environment, New_Environment)).
-eval_declarations(declarations(datatype(_Datatype), identifier(variable(Identifier))), Environment, New_Environment) :- (declaration_initial_lookup(Identifier, Environment, Result) -> update(Identifier, Result, Environment, New_Environment) ; update(Identifier, _, Environment, New_Environment)).
+eval_declarations(declarations(datatype(_Datatype), identifier(variable(Identifier)), number(Value)), Environment, New_Environment) :- (declaration_lookup(Identifier, Environment, _Result) -> write("Variable "), write(Identifier), write(" previously declared"), fail ; update(Identifier, Value, Environment, New_Environment)).
+eval_declarations(declarations(datatype(_Datatype), identifier(variable(Identifier)), value(string(Value))), Environment, New_Environment) :- (declaration_lookup(Identifier, Environment, _Result) -> write("Variable "), write(Identifier), write(" previously declared"), fail  ; update(Identifier, Value, Environment, New_Environment)).
+eval_declarations(declarations(datatype(_Datatype), identifier(variable(Identifier))), Environment, New_Environment) :- (declaration_lookup(Identifier, Environment, Result) -> update(Identifier, Result, Environment, New_Environment) ; update(Identifier, _, Environment, New_Environment)).
 
 % eval_commands/3 will take input commands and will evaluate them conforming to the current environment
 % eval_commands will have a side affect on the environment to produce a new environment.
@@ -212,6 +216,7 @@ eval_print_statements(print_string(N), Environment, Environment) :- write(N).
 eval_print_statements(print_number(N), Environment, Environment) :- write(N).
 eval_print_statements(print_id(variable(N)), Environment, Environment) :- lookup(N, Environment, Result), write(Result).
 
+
 % eval_bool/4 will take into account an Environment and will evaluate an expression, which might have a
 % side affect on the environment, and hence will return a new environment as well. It will return true or false depending on
 % whether the expressions resolved conform to the rules of a boolean expression
@@ -237,13 +242,15 @@ eval_bool(false(false), Environment, Environment, false).
 eval_bool(==(Expressions, Expressions2), Environment, New_Environment, true) :- eval_expr(Expressions, Environment, Result, MediatorEnvironment), eval_expr(Expressions2, MediatorEnvironment, Result2, New_Environment), Result = Result2.
 eval_bool(==(Expressions, Expressions2), Environment, New_Environment, false) :- eval_expr(Expressions, Environment, Result, MediatorEnvironment), eval_expr(Expressions2, MediatorEnvironment, Result2, New_Environment), Result =\= Result2.
 eval_bool(>(Expressions, Expressions2), Environment, New_Environment, true) :- eval_expr(Expressions, Environment, Result, MediatorEnvironment), eval_expr(Expressions2, MediatorEnvironment, Result2, New_Environment), Result > Result2.
-eval_bool(>(Expressions, Expressions2), Environment, New_Environment, false) :- eval_expr(Expressions, Environment, Result, MediatorEnvironment), eval_expr(Expressions2, MediatorEnvironment, Result2, New_Environment), Result < Result2.
+eval_bool(>(Expressions, Expressions2), Environment, New_Environment, false) :- eval_expr(Expressions, Environment, Result, MediatorEnvironment), eval_expr(Expressions2, MediatorEnvironment, Result2, New_Environment), Result =< Result2.
 eval_bool(<(Expressions, Expressions2), Environment, New_Environment, true) :- eval_expr(Expressions, Environment, Result, MediatorEnvironment), eval_expr(Expressions2, MediatorEnvironment, Result2, New_Environment), Result < Result2.
-eval_bool(<(Expressions, Expressions2), Environment, New_Environment, false) :- eval_expr(Expressions, Environment, Result, MediatorEnvironment), eval_expr(Expressions2, MediatorEnvironment, Result2, New_Environment), Result > Result2.
+eval_bool(<(Expressions, Expressions2), Environment, New_Environment, false) :- eval_expr(Expressions, Environment, Result, MediatorEnvironment), eval_expr(Expressions2, MediatorEnvironment, Result2, New_Environment), Result >= Result2.
 eval_bool(>=(Expressions, Expressions2), Environment, New_Environment, true) :- eval_expr(Expressions, Environment, Result, MediatorEnvironment), eval_expr(Expressions2, MediatorEnvironment, Result2, New_Environment), Result >= Result2.
 eval_bool(>=(Expressions, Expressions2), Environment, New_Environment, false) :- eval_expr(Expressions, Environment, Result, MediatorEnvironment), eval_expr(Expressions2, MediatorEnvironment, Result2, New_Environment), Result < Result2.
 eval_bool(<=(Expressions, Expressions2), Environment, New_Environment, true) :- eval_expr(Expressions, Environment, Result, MediatorEnvironment), eval_expr(Expressions2, MediatorEnvironment, Result2, New_Environment), Result =< Result2.
 eval_bool(<=(Expressions, Expressions2), Environment, New_Environment, false) :- eval_expr(Expressions, Environment, Result, MediatorEnvironment), eval_expr(Expressions2, MediatorEnvironment, Result2, New_Environment), Result > Result2.
+eval_bool(!=(Expressions, Expressions2), Environment, New_Environment, true) :- eval_expr(Expressions, Environment, Result, MediatorEnvironment), eval_expr(Expressions2, MediatorEnvironment, Result2, New_Environment), Result \= Result2.
+eval_bool(!=(Expressions, Expressions2), Environment, New_Environment, false) :- eval_expr(Expressions, Environment, Result, MediatorEnvironment), eval_expr(Expressions2, MediatorEnvironment, Result2, New_Environment), Result == Result2.
 eval_bool(not(Boolean), Environment, New_Environment, true) :- eval_bool(Boolean, Environment, New_Environment, false).
 eval_bool(not(Boolean), Environment, New_Environment, false) :- eval_bool(Boolean, Environment, New_Environment, true).
 
@@ -270,9 +277,9 @@ eval_expr(variable(Variable), Environment, Number, Environment) :- lookup(Variab
 % declaration_initial_lookup(x, [(x,2)], Value).
 % declaration_initial_lookup(x, [(y,2)], Value).
 
-declaration_initial_lookup(Identifier, [(Identifier, Value)|_], Value).
-declaration_initial_lookup(Identifier, [(Head, _)|RestofEnvironment], Value) :- Identifier \= Head, declaration_initial_lookup(Identifier, RestofEnvironment, Value).
-declaration_initial_lookup(_, [], _) :- fail.
+declaration_lookup(Identifier, [(Identifier, Value)|_], Value).
+declaration_lookup(Identifier, [(Head, _)|RestofEnvironment], Value) :- Identifier \= Head, declaration_lookup(Identifier, RestofEnvironment, Value).
+declaration_lookup(_, [], _) :- fail.
 
 % lookup searches for the value of an identifier within an environment,
 % Once found, it will return the value, else will throw an error.
