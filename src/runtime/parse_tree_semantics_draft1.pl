@@ -51,8 +51,11 @@ commands(csyntactic_sugar_mult(Variable, Expression)) --> variable(Variable), [*
 commands(csyntactic_sugar_div(Variable, Expression)) --> variable(Variable), [/=], expr(Expression), [;].
 commands(block(Block)) --> block(Block).
 
+
+print_statements(endline_and_more(N,Print)) --> ['<<'], [endl], print_statements(Print), {N = endl}, !.
 print_statements(print_string_and_more(N, Print)) --> ['<<'], [N], print_statements(Print), {string(N)}.
 print_statements(print_expr_and_more(N, Print)) --> ['<<'], expr(N), print_statements(Print).
+print_statements(endline(N)) --> ['<<'], [endl], [;], {N = endl}, !.
 print_statements(print_string(N)) --> ['<<'], [N], [;], {string(N)}.
 print_statements(print_expr(N)) --> ['<<'], expr(N), [;].
 
@@ -205,12 +208,12 @@ commands(csyntactic_sugar_mult(Variable, Expression)) --> variable(Variable), [*
 commands(csyntactic_sugar_div(Variable, Expression)) --> variable(Variable), [/=], expr(Expression), [;].
 commands(Block) --> block(Block).
 
-print_statements(print_string_and_more(N, Print)) --> [<<], [N], print_statements(Print), {string(N)}.
-print_statements(print_number_and_more(N, Print)) --> [<<], [N], print_statements(Print), {number(N)}.
-print_statements(print_id_and_more(N, Print)) --> [<<], variable(N), print_statements(Print).
-print_statements(print_string(N)) --> [<<], [N], [;], {string(N)}.
-print_statements(print_number(N)) --> [<<], [N], [;], {number(N)}.
-print_statements(print_id(N)) --> [<<], variable(N), [;].
+print_statements(endline_and_more(N,Print)) --> ['<<'], [endl], print_statements(Print), {N = endl}, !.
+print_statements(print_string_and_more(N, Print)) --> ['<<'], [N], print_statements(Print), {string(N)}.
+print_statements(print_expr_and_more(N, Print)) --> ['<<'], expr(N), print_statements(Print).
+print_statements(endline(N)) --> ['<<'], [endl], [;], {N = endl}, !.
+print_statements(print_string(N)) --> ['<<'], [N], [;], {string(N)}.
+print_statements(print_expr(N)) --> ['<<'], expr(N), [;].
 
 */
 
@@ -237,11 +240,12 @@ eval_commands(csyntactic_sugar_minus(variable(Variable), Expression), Environmen
 eval_commands(csyntactic_sugar_mult(variable(Variable), Expression), Environment, New_Environment) :- eval_expr(Expression, Environment, ExprResult, Med_Env), lookup(Variable, Med_Env, VariableValue), Result is ExprResult * VariableValue, update(Variable, Result, Med_Env, New_Environment).
 eval_commands(csyntactic_sugar_div(variable(Variable), Expression), Environment,New_Environment) :- eval_expr(Expression, Environment, ExprResult, Med_Env), lookup(Variable, Med_Env, VariableValue), Result is VariableValue / ExprResult, update(Variable, Result, Med_Env, New_Environment).
 
-
+eval_print_statements(endline_and_more(_N,Print), Environment, Environment) :- nl, eval_print_statements(Print, Environment, Environment).
 eval_print_statements(print_string_and_more(N, Print), Environment, Environment) :- write(N), eval_print_statements(Print, Environment, Environment).
 eval_print_statements(print_expr_and_more(number(N), Print), Environment, Environment) :- write(N), eval_print_statements(Print, Environment, Environment).
 eval_print_statements(print_expr_and_more(variable(N), Print), Environment, Environment) :- lookup(N, Environment, Result), write(Result), eval_print_statements(Print, Environment, Environment).
 
+eval_print_statements(endline(_N), Environment, Environment) :- nl.
 eval_print_statements(print_string(N), Environment, Environment) :- write(N).
 eval_print_statements(print_expr(variable(N)), Environment, Environment) :- lookup(N, Environment, Result), write(Result).
 eval_print_statements(print_expr(number(N)), Environment, Environment) :- write(N).
