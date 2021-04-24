@@ -1,3 +1,7 @@
+/****  author  : Paresh Pandit         ****/
+ /****  Date    : Apr 23,2021            ****/
+/****  Purpose  : Parse tree generation ****/
+/****  Version  : 3.0                  ****/
 :- table expr_minus/2, term/2, multiply/2, division/2. 
 :- use_rendering(svgtree).
 % program will parse the block ending with a [.].
@@ -28,6 +32,8 @@ statements --> commands.
 declarations --> datatype, variable, [=], number, [;].
 declarations --> datatype, variable, [=], value, [;].
 declarations --> datatype, variable, [;].
+declarations --> datatype, variable, [=], boolean, [?], expr, [:], expr, [;].
+
 
 % commands will be assignment, an if condition or a while condition.
 % a command can have a block within it, and will incorporate that to parse a statement
@@ -42,6 +48,7 @@ commands --> [for], variable, [in], [range], ['('], expr, [:], expr, [')'], comm
 commands --> [for], variable, [in], [range], ['('], expr, [')'], commands.
 commands --> [if], ['('], boolean, [')'], commands,  [else],  commands.
 commands --> [if], ['('], boolean, [')'], commands.
+commands --> variable, [=], boolean, [?], expr, [:], expr, [;].
 commands --> variable, [++], [;].
 commands --> [while], ['('], boolean, [')'], commands.
 commands --> variable, [+=], expr, [;].
