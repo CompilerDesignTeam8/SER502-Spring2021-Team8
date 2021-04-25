@@ -3,7 +3,7 @@
 /****  Purpose  : Parse tree generation ****/
 /****  Version  : 4.0                  ****/
 :- table expr_minus/2, term/2, multiply/2, division/2. 
-:- use_rendering(svgtree).
+%:- use_rendering(svgtree).
 % program will parse the block ending with a [.].
 % test the following predicate by running the following command 
 
