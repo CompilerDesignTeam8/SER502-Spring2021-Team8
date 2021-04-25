@@ -1,0 +1,15 @@
+main{
+    float a = 1;
+    float b = 2;
+
+    while (a < 10) {
+    print << 'a ' << a << endl;
+        b = 2;
+        while (b < 10) {
+            print << 'b ' << b << endl;
+            b++;
+        }
+        a++;
+    }
+}
+
