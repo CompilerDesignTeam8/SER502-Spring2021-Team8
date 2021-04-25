@@ -129,4 +129,4 @@ number --> ['('], expr, [')'].
 number --> [N], { number(N) }.
 value --> [N],  { string(N) }.
 
-datatype --> [float] ; [int]; [string] ; [var]; [const].
+datatype --> [float] ; [string].
