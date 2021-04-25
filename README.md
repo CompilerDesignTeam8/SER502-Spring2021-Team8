@@ -29,14 +29,17 @@ Install Instructions to run the language :
  4. enter <your file name>.ipt in the console 
 
  5. It will print result in the console and also save iptok file in doc folder
+ 
 
 Run instruction from command line: 
 
-cd SER-502-Spring-2018-Team29/src
+1. cd SER-502-Spring-2018-Team29/src
 
-start python virtual environment
+2. start python virtual environment
 
-run python impetus.py
+3. python impetus.py
+
+ <img width="740" alt="Screen Shot 2021-04-24 at 11 52 32 PM" src="https://user-images.githubusercontent.com/40597995/115983815-72672700-a558-11eb-8cc0-a6e183520088.png">
 
 
 Demonstration video link  : https://www.youtube.com/channel/UC1x5gXc0zms6LDh98zkGHGg/videos
