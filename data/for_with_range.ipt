@@ -1,0 +1,6 @@
+main{
+    float a = 5;
+    for i in range(a){
+        print << 'this is i' << i << endl ;
+    }
+}
