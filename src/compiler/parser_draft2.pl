@@ -76,6 +76,7 @@ expr --> expr_increment.
 expr --> expr_minus.
 expr_increment --> expr_syntactic_sugar_add.
 expr_increment --> variable, [++].
+expr_increment --> expr_decrement.
 expr_decrement --> variable, [--].
 expr_syntactic_sugar_add --> variable, [+=], expr.
 expr_syntactic_sugar_add --> expr_syntactic_sugar_minus.
