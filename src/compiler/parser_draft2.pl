@@ -37,10 +37,6 @@ declarations --> datatype, variable, [=], boolean, [?], expr, [:], expr, [;].
 
 % commands will be assignment, an if condition or a while condition.
 % a command can have a block within it, and will incorporate that to parse a statement
-% Run the command below to test the command/2 predicate.
-
-% commands([z, :=, 0, ;, if, x, =, y, +, 2, then, z , := , 5, else, z, :=, 3, endif, ;, while, not, x, =, z, do, z, :=, z, /, 2, endwhile], []).
-% commands([z, :=, 0, ;, if, x, =, y, +, 2, then, begin, var, u, ;, z , := , 5,;, u, :=, 3, end, else, z, :=, 3, endif, ;, while, not, x, =, z, do, z, :=, z, /, 2, endwhile], []).
 
 commands --> variable, [=], expr, [;].
 commands --> [for], ['('], expr, [;], boolean, [;], expr, [')'], commands.
