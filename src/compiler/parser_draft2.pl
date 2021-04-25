@@ -13,9 +13,6 @@ program --> [main], block.
 
 % block is any block that starts with a [begin] and ends with an [end].
 % a block has declarations and commands.
-% test the following predicate using the following commands 
-
-% block([begin, const, x, =, 8, ;, var, y, ;, var, z, ;, z, :=, 0, ;, if, x, =, y, +, 2, then, begin, var, u, ;, z , := , 5,;, u, :=, 3, end, else, z, :=, 3, endif, ;, while, not, x, =, z, do, z, :=, z, /, 2, endwhile, end], []).
 
 block --> ['{'], statements, ['}'].
 
@@ -24,10 +21,7 @@ statements --> commands, statements.
 statements --> declarations.
 statements --> commands.
 
-% a declarations is anything that either declares a [const] or a [var].
-% running the command below would give the working of the predicate declarations/2.
-
-% declarations([const, z, =, 2, ;, var, z, ;, var, y], []).
+% a declarations is anything that either declares a float or string.
 
 declarations --> datatype, variable, [=], number, [;].
 declarations --> datatype, variable, [=], value, [;].
@@ -75,11 +69,7 @@ boolean --> [!], boolean.
 % expressions can be [2, +, 3, +, 5], and this way it handles the precedence by introducing different levels 
 % for different operators, we follow the PEMDAS rule and therefore express precedence following the said rule.
 % expressions will also adhere to the associativity rule and take care of left -> right rule in arithmetic.
-% test the following predicate by passing the following command(s)
 
-% expressions([2, +, 3, *, 5], []).
-% expressions([2, +, 3, *, 5], []).
-% expressions([2, *, 3, *, 5, + , 3, *, 4, *, 5], []).
 
 expr --> datatype, variable, [=], expr.
 expr --> expr_increment.
