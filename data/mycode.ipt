@@ -1,0 +1,15 @@
+main{
+    float a = 100;
+    float b = 2;
+    for(float i = 0; i < 20; i++){
+        print << 'This is string ' << a << endl;
+    }
+    if(a>b){
+        print << 'what can i say i am just smart';
+    }
+    while(b<a){
+        print << 'Value of b is' << b << endl;
+        b += 1;
+    }
+}
+
