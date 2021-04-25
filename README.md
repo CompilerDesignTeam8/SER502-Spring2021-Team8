@@ -9,7 +9,11 @@ Name of the language is "Impetus".
 
 Platforms: Linux, Windows or Mac OS
 
-Tools used : SWI prolog, Python
+Tools used : 
+  o SWI prolog, 
+  o Python, 
+  o Lexer made with :SLY library in python https://sly.readthedocs.io/en/latest/sly.html
+  o Python and prolog connection: Pyswip https://pypi.org/project/pyswip/0.2.2/
 
 Development Environment :  Python 3.8.6 , SWI prolog
 
