@@ -1,4 +1,4 @@
-:- table expr_minus/3, term/3, multiply/3, division/3. 
+:- table expr_minus/3, term/3, multiply/3, division/3.
 %:- use_rendering(svgtree).
 % _version_9
 
@@ -49,20 +49,24 @@ commands(if(boolean(Boolean), commands(Commands))) --> [if], ['('], boolean(Bool
 commands(ternary_if(identifier(Identifier), boolean(Boolean), expression(Expression1), expression(Expression2))) --> variable(Identifier), [=], boolean(Boolean), [?], expr(Expression1), [:], expr(Expression2), [;].
 commands(while(boolean(Boolean), commands(Commands))) --> [while], ['('], boolean(Boolean), [')'], commands(Commands).
 commands(print(N)) --> [print], print_statements(N).
-commands(cincrement(Variable)) --> variable(Variable), [++], [;].
-commands(csyntactic_sugar_add(Variable, Expression)) --> variable(Variable), [+=], expr(Expression), [;].
-commands(csyntactic_sugar_minus(Variable, Expression)) --> variable(Variable), [-=], expr(Expression), [;].
-commands(csyntactic_sugar_mult(Variable, Expression)) --> variable(Variable), [*=], expr(Expression), [;].
-commands(csyntactic_sugar_div(Variable, Expression)) --> variable(Variable), [/=], expr(Expression), [;].
+commands(cincrement(Variable)) --> variable(Variable), [+, +], [;].
+commands(csyntactic_sugar_add(Variable, Expression)) --> variable(Variable), [+,=], expr(Expression), [;].
+commands(csyntactic_sugar_minus(Variable, Expression)) --> variable(Variable), [-,=], expr(Expression), [;].
+commands(csyntactic_sugar_mult(Variable, Expression)) --> variable(Variable), [*,=], expr(Expression), [;].
+commands(csyntactic_sugar_div(Variable, Expression)) --> variable(Variable), [/,=], expr(Expression), [;].
 commands(block(Block)) --> block(Block).
 
 
-print_statements(endline_and_more(N,Print)) --> ['<<'], [endl], print_statements(Print), {N = endl}, !.
-print_statements(print_string_and_more(N, Print)) --> ['<<'], [N], print_statements(Print), {string(N)}.
-print_statements(print_expr_and_more(N, Print)) --> ['<<'], expr(N), print_statements(Print).
-print_statements(endline(N)) --> ['<<'], [endl], [;], {N = endl}, !.
-print_statements(print_string(N)) --> ['<<'], [N], [;], {string(N)}.
-print_statements(print_expr(N)) --> ['<<'], expr(N), [;].
+print_statements(endline_and_more(N,Print)) --> ['<','<'], [endl], print_statements(Print), {N = endl}, !.
+print_statements(print_string_and_more(N, Print)) --> ['<','<', "'"], get_all_string(N), print_statements(Print), !.
+print_statements(print_expr_and_more(N, Print)) --> ['<','<'], expr(N), print_statements(Print).
+print_statements(endline(N)) --> ['<','<'], [endl], [;], {N = endl}, !.
+print_statements(print_string(N)) --> ['<','<', "'"], get_all_string(N), [;], !.
+print_statements(print_expr(N)) --> ['<','<'], expr(N), [;].
+
+get_all_string(N) --> ["'"], {N = ''}, !.
+get_all_string(N) --> [X], get_all_string(M), {atomic_list_concat([X, ' ', M], Q), atom_string(Q, N)}.
+
 
 % boolean is a condition which checks whether a given statement is of type boolean
 % to satisfy this, it should either be true, false, expression = expression, or not boolean.
@@ -74,9 +78,9 @@ boolean(true(T)) --> [true], {T = true}.
 boolean(false(F)) --> [false], {F = false}.
 boolean(>(Expressions, Expressions2)) --> expr(Expressions), [>], expr(Expressions2).
 boolean(<(Expressions, Expressions2)) --> expr(Expressions), [<], expr(Expressions2).
-boolean(>=(Expressions, Expressions2)) --> expr(Expressions), [>=], expr(Expressions2).
-boolean(<=(Expressions, Expressions2)) --> expr(Expressions), [<=], expr(Expressions2).
-boolean(==(Expressions, Expressions2)) --> expr(Expressions), [==], expr(Expressions2).
+boolean(>=(Expressions, Expressions2)) --> expr(Expressions), [>,=], expr(Expressions2).
+boolean(<=(Expressions, Expressions2)) --> expr(Expressions), [<,=], expr(Expressions2).
+boolean(==(Expressions, Expressions2)) --> expr(Expressions), [=,=], expr(Expressions2).
 boolean(!=(Expressions, Expressions2)) --> expr(Expressions), ["!="], expr(Expressions2).
 boolean(not(Boolean)) --> [!], boolean(Boolean).
 
@@ -91,19 +95,19 @@ boolean(not(Boolean)) --> [!], boolean(Boolean).
 % expressions([2, +, 3, *, 5], []).
 % expressions([2, *, 3, *, 5, + , 3, *, 4, *, 5], []).
 
-expr(expr_assgn(Variable, Expressions)) --> variable(Variable), [=], expr(Expressions).
+expr(expr_assgn(Variable, Expressions)) --> variable(Variable), [=], expr(Expressions), !.
 expr(Brackets) --> expr_increment(Brackets).
-expr_increment(increment(Variable)) --> variable(Variable), [++].
+expr_increment(increment(Variable)) --> variable(Variable), [+,+], !.
 expr_increment(Expression) --> expr_decrement(Expression).
-expr_decrement(decrement(Variable)) --> variable(Variable), [--].
+expr_decrement(decrement(Variable)) --> variable(Variable), [-,-], !.
 expr_decrement(Expression) --> expr_syntactic_sugar_add(Expression).
-expr_syntactic_sugar_add(syntactic_sugar_add(Variable, Expression)) --> variable(Variable), [+=], expr(Expression).
+expr_syntactic_sugar_add(syntactic_sugar_add(Variable, Expression)) --> variable(Variable), [+,=], expr(Expression), !.
 expr_syntactic_sugar_add(Expression) --> expr_syntactic_sugar_minus(Expression).
-expr_syntactic_sugar_minus(syntactic_sugar_minus(Variable, Expression)) --> variable(Variable), [-=], expr(Expression).
+expr_syntactic_sugar_minus(syntactic_sugar_minus(Variable, Expression)) --> variable(Variable), [-,=], expr(Expression), !.
 expr_syntactic_sugar_minus(Expression) --> expr_syntactic_sugar_multiply(Expression).
-expr_syntactic_sugar_multiply(syntactic_sugar_mult(Variable, Expression)) --> variable(Variable), [*=], expr(Expression).
+expr_syntactic_sugar_multiply(syntactic_sugar_mult(Variable, Expression)) --> variable(Variable), [*,=], expr(Expression), !.
 expr_syntactic_sugar_multiply(Expression) --> expr_syntactic_sugar_divide(Expression).
-expr_syntactic_sugar_divide(syntactic_sugar_div(Variable, Expression)) --> variable(Variable), [/=], expr(Expression).
+expr_syntactic_sugar_divide(syntactic_sugar_div(Variable, Expression)) --> variable(Variable), [/,=], expr(Expression), !.
 expr_syntactic_sugar_divide(Expression) --> expr_minus(Expression).
 expr_minus(-(T1, T2)) --> expr_minus(T1), [-], term(T2).
 expr_minus(T1) --> term(T1).
@@ -135,10 +139,7 @@ number(number(N)) --> [N], { number(N) }.
 value(string(String)) --> [String], {string(String)}.
 
 datatype(float) --> [float].
-datatype(int) --> [int].
 datatype(string) --> [string].
-datatype(var) --> [var].
-datatype(const) --> [const].
 
 
 
@@ -194,8 +195,9 @@ declarations(ternary_if_decl(identifier(Identifier), boolean(Boolean), expressio
 
 */
 
+eval_declarations(declarations(datatype(Datatype), identifier(variable(Identifier)), expression(Expressions)), Environment, New_Environment) :- (declaration_lookup(Identifier, Environment, _Result) -> write("Variable "), write(Identifier), write(" previously declared"), fail ; eval_expr(Expressions, Environment, Result, MedEnv), Datatype = float, float(Result), update(Identifier, Result, MedEnv, New_Environment)).
 eval_declarations(declarations(datatype(_Datatype), identifier(variable(Identifier)), expression(Expressions)), Environment, New_Environment) :- (declaration_lookup(Identifier, Environment, _Result) -> write("Variable "), write(Identifier), write(" previously declared"), fail ; eval_expr(Expressions, Environment, Result, MedEnv), update(Identifier, Result, MedEnv, New_Environment)).
-eval_declarations(declarations(datatype(_Datatype), identifier(variable(Identifier)), value(string(Value))), Environment, New_Environment) :- (declaration_lookup(Identifier, Environment, _Result) -> write("Variable "), write(Identifier), write(" previously declared"), fail  ; update(Identifier, Value, Environment, New_Environment)).
+eval_declarations(declarations(datatype(Datatype), identifier(variable(Identifier)), value(string(Value))), Environment, New_Environment) :- (declaration_lookup(Identifier, Environment, _Result) -> write("Variable "), write(Identifier), write(" previously declared"), fail  ; Datatype = string, string(Value), update(Identifier, Value, Environment, New_Environment)).
 eval_declarations(declarations(datatype(_Datatype), identifier(variable(Identifier))), Environment, New_Environment) :- (declaration_lookup(Identifier, Environment, Result) -> update(Identifier, Result, Environment, New_Environment) ; update(Identifier, _, Environment, New_Environment)).
 eval_declarations(ternary_if_decl(identifier(variable(Identifier)), boolean(Boolean), expression(Expression1), expression(_Expression2)), Environment, New_Environment) :- (declaration_lookup(Identifier, Environment, _Result) -> write("Variable "), write(Identifier), write(" previously declared"), fail  ; eval_bool(Boolean, Environment, MediatorEnv, true), eval_expr(Expression1, MediatorEnv, Result, NewMediatorEnv), update(Identifier, Result, NewMediatorEnv, New_Environment)).
 eval_declarations(ternary_if_decl(identifier(variable(Identifier)), boolean(Boolean), expression(_Expression1), expression(Expression2)), Environment, New_Environment) :- (declaration_lookup(Identifier, Environment, _Result) -> write("Variable "), write(Identifier), write(" previously declared"), fail  ; eval_bool(Boolean, Environment, MediatorEnv, false), eval_expr(Expression2, MediatorEnv, Result, NewMediatorEnv), update(Identifier, Result, NewMediatorEnv, New_Environment)).
@@ -233,7 +235,7 @@ commands(legacy_for_loop(expression(Expression), boolean(Boolean), expressions(E
 */
 
 eval_commands(range_for_loop(variable(Variable), from(number(NumberFrom)), to(number(NumberTo)), Commands), Environment, NewEnvironment) :- update(Variable, NumberFrom, Environment, MedEnv), eval_commands(range_for_loop_helper(Variable, NumberTo, Commands), MedEnv, NewEnvironment).
-eval_commands(new_range_for_loop(variable(Variable), to(number(NumberTo)), Commands), Environment, NewEnvironment) :- update(Variable, 0, Environment, MedEnv), eval_commands(range_for_loop_helper(Variable, NumberTo, Commands), MedEnv, NewEnvironment).
+eval_commands(new_range_for_loop(variable(Variable), to(NumberTo), Commands), Environment, NewEnvironment) :- update(Variable, 0, Environment, MedEnv),eval_expr(NumberTo, MedEnv, Result, NewMedEnv), eval_commands(range_for_loop_helper(Variable, Result, Commands), NewMedEnv, NewEnvironment).
 eval_commands(range_for_loop_helper(Variable, NumberTo, Commands), Environment, NewEnvironment) :- lookup(Variable, Environment, Result), Result < NumberTo, eval_commands(Commands, Environment, MedEnv), Iteration is Result + 1, update(Variable, Iteration, MedEnv, NewMedEnv), eval_commands(range_for_loop_helper(Variable, NumberTo, Commands), NewMedEnv, NewEnvironment). 
 eval_commands(range_for_loop_helper(Variable, NumberTo, _Commands), Environment, Environment) :- lookup(Variable, Environment, Result), Result >= NumberTo. 
 eval_commands(legacy_for_loop(declarations(Declaration), boolean(Boolean), expressions(Expression), commands(Commands)), Environment, New_Environment) :- eval_declarations(Declaration, Environment, MediatorEnv), eval_commands(recursive_for(boolean(Boolean), expression(Expression), commands(Commands)), MediatorEnv, New_Environment).
