@@ -7,4 +7,36 @@ The team members are :  Shubhangi Gupta, Arjun Borkhatariya, Paresh Pandit , Nit
 Name of the language is "Impetus". 
 
 
+Platforms: Linux, Windows or Mac OS
 
+Tools used : SWI prolog, Python
+
+Development Environment :  Python 3.8.6 , SWI prolog
+
+Install Instructions to run the language : 
+
+  git URL :  https://github.com/CompilerDesignTeam8/SER502-Spring2021-Team8
+
+ 1. clone the git URL
+    git clone https://github.com/CompilerDesignTeam8/SER502-Spring2021-Team8
+
+ 2. Put .ipt file code in the SER502-Spring2021-Team8/data/ folder
+
+ 2. open SER502-Spring2021-Team8/src/impetus.py file in python virtual environment
+
+ 3. after running python file it will ask to enter the name of .ipt file
+
+ 4. enter <your file name>.ipt in the console 
+
+ 5. It will print result in the console and also save iptok file in doc folder
+
+Run instruction from command line: 
+
+cd SER-502-Spring-2018-Team29/src
+
+start python virtual environment
+
+run python impetus.py
+
+
+Demonstration video link  : https://www.youtube.com/channel/UC1x5gXc0zms6LDh98zkGHGg/videos
