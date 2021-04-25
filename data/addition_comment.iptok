@@ -1,0 +1,1 @@
+[main, '{', float, a, =, 3.5, ;, float, b, =, 2.4, ;, float, c, ;, c, =, a, +, b, ;, print, <, <, "'", value,of, c, is, "'", <, <, c, ;, '}']
