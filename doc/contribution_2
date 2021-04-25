@@ -1,0 +1,42 @@
+Contribution Text File
+
+/********************************************/
+
+Spring 2021 - Team 8
+Shubhangi Gupta
+Nitish Tripathi
+Arjun Borkhatariya
+Paresh Pandit
+
+/********************************************/
+
+Shubhangi Gupta
+1. Assisted with the Grammar design
+2. Worked on Parse Tree generation and sample runs
+3. Worked on the Documentation, presentation and project structure.
+4. Present intermediate code generation in demo video
+
+/********************************************/
+
+Nitish Tripathi
+1. Worked on the grammar rules
+2. Designed semantic analyzer
+3. Worked on integration of code.
+4. Present runtime in demo video
+
+/********************************************/
+
+Arjun
+
+1. Worked on Lexical Analysis
+2. Supported intermediate code generator building
+3. Worked on integration of code.
+4. Present lexical analyzer in demo video
+
+/********************************************/
+
+Paresh Pandit
+1. Worked on Parser and compile time type checking.
+2. Worked on integration of code.
+3. Worked on the demonstration video and presentation. 
+4. Present introduction, grammar and parser in demo video
